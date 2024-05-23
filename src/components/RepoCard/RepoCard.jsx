@@ -1,13 +1,28 @@
 /* eslint-disable react/prop-types */
-import './RepoCard.css';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import truncateText from '../../utils/truncateText';
+import './RepoCard.css';
 
 const RepoCard = ({ repo, openModal }) => (
-  <div className="repo-card">
-    <h2>{repo.name}</h2>
-    <p className="description">{truncateText(repo.description, 50)}</p>
-    <button onClick={() => openModal(repo)}>View More</button>
-  </div>
+  <Card className="repo-card" elevation={3}>
+    <CardContent>
+      <Typography variant="h5" component="div">
+        {repo.name}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" className="description">
+        {truncateText(repo.description, 50)}
+      </Typography>
+    </CardContent>
+    <CardActions>
+      <Button size="small" onClick={() => openModal(repo)}>
+        View More
+      </Button>
+    </CardActions>
+  </Card>
 );
 
 export default RepoCard;
