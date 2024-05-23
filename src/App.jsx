@@ -1,31 +1,45 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import './App.css'
+import RepoGallery from '../src/components/RepoGallery/RepoGallery';
+import RepoModal from '../src/components/RepoModal/RepoModal';
+import Loading from '../src/components/Loading/Loading';
+import Error from '../src/components/Error/Error';
+import { fetchRepos } from '../src/services/api';
+import SearchBar from '../src/components/SearchBar/SearchBar';
+import './App.css';
 
-function App() {
+const App = () => {
   const [repos, setRepos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedRepo, setSelectedRepo] = useState(null);
+  const [username, setUsername] = useState('Lydan186');
+  const [inputValue, setInputValue] = useState('Lydan186');
+
+  const getRepos = async (username) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchRepos(username);
+      setRepos(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRepos = async () => {
-      try {
-        const response = await fetch('https://api.github.com/users/Isaac-Abarca/repos');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setRepos(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    getRepos(username);
+  }, [username]);
 
-    fetchRepos();
-  }, []);
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSearch = () => {
+    setUsername(inputValue);
+  };
 
   const openModal = (repo) => {
     setSelectedRepo(repo);
@@ -35,54 +49,21 @@ function App() {
     setSelectedRepo(null);
   };
 
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="error">Error: {error}</div>;
-  }
-
   return (
-    <div className="repo-gallery">
-      {repos.map(repo => (
-        <RepoCard key={repo.id} repo={repo} openModal={openModal} />
-      ))}
+    <div className="app">
+      <SearchBar 
+        inputValue={inputValue} 
+        handleInputChange={handleInputChange} 
+        handleSearch={handleSearch} 
+      />
+      {loading && <Loading />}
+      {error && <Error error={error} />}
+      {!loading && !error && (
+        <RepoGallery repos={repos} openModal={openModal} />
+      )}
       {selectedRepo && <RepoModal repo={selectedRepo} closeModal={closeModal} />}
     </div>
   );
-}
-
-const truncateText = (text, maxLength) => {
-  if (!text) return 'No description available';
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
 };
 
-const RepoCard = ({ repo, openModal }) => (
-  <div className="repo-card">
-    <h2>{repo.name}</h2>
-    <p className="description">{truncateText(repo.description, 50)}</p>
-    <button onClick={() => openModal(repo)}>View More</button>
-  </div>
-);
-
-const RepoModal = ({ repo, closeModal }) => (
-  <div className="modal">
-    <div className="modal-content">
-      <span className="close" onClick={closeModal}>&times;</span>
-      <h2>{repo.name}</h2>
-      <p>{repo.description || 'No description available'}</p>
-      <p><strong>Language:</strong> {repo.language || 'N/A'}</p>
-      <p><strong>Stars:</strong> {repo.stargazers_count}</p>
-      <p><strong>Forks:</strong> {repo.forks_count}</p>
-      <p><strong>Created at:</strong> {new Date(repo.created_at).toLocaleDateString()}</p>
-      <p><strong>Last updated:</strong> {new Date(repo.updated_at).toLocaleDateString()}</p>
-      <a href={repo.html_url} target="_blank" rel="noopener noreferrer">View Repository</a>
-    </div>
-  </div>
-)
-
-
-
-export default App
+export default App;
