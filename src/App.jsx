@@ -13,8 +13,8 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedRepo, setSelectedRepo] = useState(null);
-  const [username, setUsername] = useState('Lydan186');
-  const [inputValue, setInputValue] = useState('Lydan186');
+  const [username, setUsername] = useState('Isaac-Abarca');
+  const [inputValue, setInputValue] = useState('Isaac-Abarca');
 
   const getRepos = async (username) => {
     setLoading(true);
